@@ -4,14 +4,7 @@ from xgboost import XGBClassifier
 from sklearn.metrics  import roc_auc_score,accuracy_score
 
 class Model_Finder:
-    """
-                This class shall  be used to find the model with best accuracy and AUC score.
-                Written By: iNeuron Intelligence
-                Version: 1.0
-                Revisions: None
-
-                """
-
+   
     def __init__(self,file_object,logger_object):
         self.file_object = file_object
         self.logger_object = logger_object
@@ -19,18 +12,7 @@ class Model_Finder:
         self.xgb = XGBClassifier(objective='binary:logistic',n_jobs=-1)
 
     def get_best_params_for_naive_bayes(self,train_x,train_y):
-        """
-        Method Name: get_best_params_for_naive_bayes
-        Description: get the parameters for the Naive Bayes's Algorithm which give the best accuracy.
-                     Use Hyper Parameter Tuning.
-        Output: The model with the best parameters
-        On Failure: Raise Exception
-
-        Written By: iNeuron Intelligence
-        Version: 1.0
-        Revisions: None
-
-                        """
+       
         self.logger_object.log(self.file_object, 'Entered the get_best_params_for_naive_bayes method of the Model_Finder class')
         try:
             # initializing with different combination of parameters
@@ -63,18 +45,6 @@ class Model_Finder:
 
     def get_best_params_for_xgboost(self,train_x,train_y):
 
-        """
-                                        Method Name: get_best_params_for_xgboost
-                                        Description: get the parameters for XGBoost Algorithm which give the best accuracy.
-                                                     Use Hyper Parameter Tuning.
-                                        Output: The model with the best parameters
-                                        On Failure: Raise Exception
-
-                                        Written By: iNeuron Intelligence
-                                        Version: 1.0
-                                        Revisions: None
-
-                                """
         self.logger_object.log(self.file_object,
                                'Entered the get_best_params_for_xgboost method of the Model_Finder class')
         try:
@@ -83,7 +53,7 @@ class Model_Finder:
 
                 "n_estimators": [50,100, 130],
                                "max_depth": range(3, 11, 1),
-    "random_state":[0,50,100]
+                                "n_child_weight": range(0.25,3,0.25)
 
             }
             # Creating an object of the Grid Search class
@@ -92,12 +62,12 @@ class Model_Finder:
             self.grid.fit(train_x, train_y)
 
             # extracting the best parameters
-            self.random_state = self.grid.best_params_['random_state']
+            self.n_child_weight = self.grid.best_params_['n_child_weight']
             self.max_depth = self.grid.best_params_['max_depth']
             self.n_estimators = self.grid.best_params_['n_estimators']
 
             # creating a new model with the best parameters
-            self.xgb = XGBClassifier(random_state=self.random_state, max_depth=self.max_depth,n_estimators= self.n_estimators, n_jobs=-1 )
+            self.xgb = XGBClassifier(n_child_weight=self.n_child_weight, max_depth=self.max_depth,n_estimators= self.n_estimators, n_jobs=-1 )
             # training the mew model
             self.xgb.fit(train_x, train_y)
             self.logger_object.log(self.file_object,
@@ -114,17 +84,7 @@ class Model_Finder:
 
 
     def get_best_model(self,train_x,train_y,test_x,test_y):
-        """
-                                                Method Name: get_best_model
-                                                Description: Find out the Model which has the best AUC score.
-                                                Output: The best model name and the model object
-                                                On Failure: Raise Exception
-
-                                                Written By: iNeuron Intelligence
-                                                Version: 1.0
-                                                Revisions: None
-
-                                        """
+       
         self.logger_object.log(self.file_object,
                                'Entered the get_best_model method of the Model_Finder class')
         # create best model for XGBoost
